@@ -1,8 +1,9 @@
 import { connect } from "mongoose";
+import "dotenv/config";
 
 const connectToMongo = async () => {
   try {
-    await connect('mongodb+srv://ganeshcoursera1122:gans123@cluster1.aboed0e.mongodb.net/razorpay');
+    await connect(process.env.mongodbURI);
     console.log("---***Database Connected Successfully***---")
   } catch (error) {
     console.log(error);
