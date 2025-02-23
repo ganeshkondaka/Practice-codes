@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Image Text Extractor",
+  "version": "1.0",
+  "description": "Extract text from images using Tesseract.js.",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.jpg",
+      "48": "icon.jpg",
+      "128": "icon.jpg"
+    }
+  }
+}
