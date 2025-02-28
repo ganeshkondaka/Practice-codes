@@ -1,15 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "WebSizz Summary",
+  "name": "Gemini Chatbot",
   "version": "1.0",
-  "description": "Summarizes selected text from the webpage.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "description": "A Chrome extension chatbot using Gemini AI",
+  "permissions": ["activeTab"],
   "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icon.png"
+    "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "background.js"
   },
-  "host_permissions": ["<all_urls>"]
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }

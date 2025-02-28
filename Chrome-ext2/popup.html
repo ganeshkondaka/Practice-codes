@@ -3,45 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebSizz Summary</title>
-  <script src="popup.js" defer></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Gemini Chatbot</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="lib/react.development.js"></script>
+  <script src="lib/react-dom.development.js"></script>
+  <script src="lib/babel.min.js"></script>
 </head>
-<body class="p-4 w-64 bg-gray-900 text-white">
-  <h1 class="text-lg font-bold">Selected Text Summary</h1>
-  <p id="summary" class="mt-4 text-sm"></p>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="popup.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebSizz</title>
-  <script src="popup.js" defer></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="w-64 p-4 bg-gray-900 text-white text-center">
-  
-  <h1 class="text-xl font-bold mb-4 animate-pulse">WebSizz TL;DR</h1>
-  <p class="text-sm text-gray-300 mb-4">Select text on any webpage and get a summary.</p>
-
-  <button id="summarizeBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-all">
-    Summarize Selected Text
-  </button>
-
-  <div id="output" class="mt-4 text-sm text-gray-200"></div>
-
-</body>
-</html> -->
