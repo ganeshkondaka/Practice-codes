@@ -1,0 +1,34 @@
+version: '3.8'  # Specify the Docker Compose version
+
+services:  # Define all the services (containers) in the application
+  mongo:  # MongoDB database service
+    image: mongo  # Use the official MongoDB image from Docker Hub
+    container_name: mongodb  # Set a custom name for the container
+    ports:
+      - "27017:27017"  # Map port 27017 on the host to port 27017 in the container
+    volumes:
+      - mongo-data:/data/db  # Persist MongoDB data using a named volume
+
+  backend:  # Backend service (Express.js)
+    build: ./backend  # Build the Docker image from the Dockerfile inside the 'backend' directory
+    container_name: backend  # Set a custom name for the backend container
+    ports:
+      - "5000:5000"  # Map port 5000 on the host to port 5000 in the container
+    depends_on:
+      - mongo  # Ensure the 'mongo' service starts before the backend
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/dockerize  # Set the MongoDB connection string
+
+  frontend:  # Frontend service (React)
+    build: ./frontend  # Build the Docker image from the Dockerfile inside the 'frontend' directory
+    container_name: frontend  # Set a custom name for the frontend container
+    ports:
+      - "3000:3000"  # Map port 3000 on the host to port 3000 in the container
+    depends_on:
+      - backend  # Ensure the 'backend' service starts before the frontend
+    environment:
+      - VITE_BACKEND_URL=http://backend:5000  # Set the backend URL for the frontend
+
+
+volumes:
+  mongo-data:  # Define a named volume for MongoDB data persistence
