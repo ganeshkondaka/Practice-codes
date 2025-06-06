@@ -1,0 +1,29 @@
+service: rss-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+
+functions:
+  fetchNews:
+    handler: handler.fetchNews
+    events:
+      - http:
+          path: news
+          method: get
+          cors: true
+
+plugins:
+  - serverless-offline
+
+package:
+  include:
+    - node_modules/**
+    - handler.js
+
+
