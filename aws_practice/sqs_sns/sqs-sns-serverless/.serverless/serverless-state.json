@@ -1,0 +1,341 @@
+{
+  "service": {
+    "service": "sqs-sns-demo",
+    "serviceObject": {
+      "name": "sqs-sns-demo"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "region": "ap-south-1",
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "sqs:*",
+                "sns:*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "environment": {
+        "MY_TOPIC_ARN": {
+          "Ref": "MyTopic"
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "SqsHandlerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/sqs-sns-demo-dev-sqsHandler"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "sqs-sns-demo",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sqs-sns-demo-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sqs-sns-demo-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "sqs:ReceiveMessage",
+                          "sqs:DeleteMessage",
+                          "sqs:GetQueueAttributes"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "MyQueue",
+                              "Arn"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "sqs-sns-demo",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "SqsHandlerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-bc762480-6a94",
+                "S3Key": "serverless/sqs-sns-demo/dev/1749448403683-2025-06-09T05:53:23.683Z/sqs-sns-demo.zip"
+              },
+              "Handler": "handler.sqsHandler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "sqs-sns-demo-dev-sqsHandler",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "MY_TOPIC_ARN": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"MY_TOPIC_ARN\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SqsHandlerLogGroup"
+            ]
+          },
+          "SqsHandlerLambdaVersionT9zjJJZgbiua2jynPKHZ1ADXiJTNs5VEjLR2rEfuAA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "SqsHandlerLambdaFunction"
+              },
+              "CodeSha256": "/qriLXBWBntNoJqVO1TuebOzzdilUcDTwOxwSF8aQIU="
+            }
+          },
+          "SqsHandlerEventSourceMappingSQSMyQueue": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": [
+              "IamRoleLambdaExecution"
+            ],
+            "Properties": {
+              "BatchSize": 10,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "MyQueue",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SqsHandlerLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Enabled": true
+            }
+          },
+          "MyQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "my-demo-queue"
+            }
+          },
+          "MyTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+              "TopicName": "my-demo-topic"
+            }
+          },
+          "MySubscription": {
+            "Type": "AWS::SNS::Subscription",
+            "Properties": {
+              "TopicArn": {
+                "Ref": "MyTopic"
+              },
+              "Protocol": "email",
+              "Endpoint": "your-email@example.com"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-ap-south-1-bc762480-6a94",
+            "Export": {
+              "Name": "sls-sqs-sns-demo-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "SqsHandlerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "SqsHandlerLambdaVersionT9zjJJZgbiua2jynPKHZ1ADXiJTNs5VEjLR2rEfuAA"
+            },
+            "Export": {
+              "Name": "sls-sqs-sns-demo-dev-SqsHandlerLambdaFunctionQualifiedArn"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "serverless-offline": {
+        "httpPort": 4000
+      }
+    },
+    "plugins": [
+      "serverless-offline"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "sqsHandler": {
+        "handler": "handler.sqsHandler",
+        "events": [
+          {
+            "sqs": {
+              "arn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][3][\"Resource\"][0]"
+              }
+            }
+          }
+        ],
+        "name": "sqs-sns-demo-dev-sqsHandler",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "SqsHandlerLambdaVersionT9zjJJZgbiua2jynPKHZ1ADXiJTNs5VEjLR2rEfuAA"
+      }
+    },
+    "resources": {
+      "Resources": {
+        "MyQueue": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "my-demo-queue"
+          }
+        },
+        "MyTopic": {
+          "Type": "AWS::SNS::Topic",
+          "Properties": {
+            "TopicName": "my-demo-topic"
+          }
+        },
+        "MySubscription": {
+          "Type": "AWS::SNS::Subscription",
+          "Properties": {
+            "TopicArn": {
+              "Ref": "MyTopic"
+            },
+            "Protocol": "email",
+            "Endpoint": "your-email@example.com"
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "service": "sqs-sns-demo",
+      "frameworkVersion": "4",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "package": {
+        "include": [
+          "node_modules/**",
+          "handler.js"
+        ],
+        "artifactsS3KeyDirname": "serverless/sqs-sns-demo/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-ap-south-1-bc762480-6a94",
+        "artifact": "D:\\mine_\\code_files_@@\\cohort_codes\\myproject_incohort\\Practice_codes\\aws_practice\\sqs_sns\\sqs-sns-serverless\\.serverless\\sqs-sns-demo.zip",
+        "artifactDirectoryName": "serverless/sqs-sns-demo/dev/1749448403683-2025-06-09T05:53:23.683Z"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "layers": {},
+    "artifact": "D:\\mine_\\code_files_@@\\cohort_codes\\myproject_incohort\\Practice_codes\\aws_practice\\sqs_sns\\sqs-sns-serverless\\.serverless\\sqs-sns-demo.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/sqs-sns-demo/dev/1749448403683-2025-06-09T05:53:23.683Z",
+    "artifact": "sqs-sns-demo.zip"
+  }
+}

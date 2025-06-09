@@ -1,0 +1,61 @@
+service: sqs-sns-demo
+
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:*
+            - sns:*
+          Resource: "*"
+  environment:
+    MY_TOPIC_ARN:
+      Ref: MyTopic
+
+functions:
+  sqsHandler:
+    handler: handler.sqsHandler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MyQueue
+              - Arn
+
+resources:
+  Resources:
+    MyQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: my-demo-queue
+
+    MyTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: my-demo-topic
+
+    MySubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn:
+          Ref: MyTopic
+        Protocol: email
+        Endpoint: your-email@example.com # Change this to your email
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+
+plugins:
+  - serverless-offline
+
+package:
+  include:
+    - node_modules/**
+    - handler.js
