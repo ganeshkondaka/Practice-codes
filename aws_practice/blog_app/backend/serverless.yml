@@ -1,0 +1,40 @@
+service: blogbuzz-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  environment:
+    DATABASE_URL: ${ssm:/blogbuzz/db-url}
+
+functions:
+  createBlog:
+    handler: functions/createBlog.handler
+    events:
+      - http:
+          path: create-blog
+          method: post
+  postComment:
+    handler: functions/postComment.handler
+    events:
+      - http:
+          path: comment
+          method: post
+  notifyAuthor:
+    handler: functions/notifyAuthor.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - CommentQueue
+              - Arn
+
+resources:
+  Resources:
+    CommentQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: blogbuzz-comment-queue
+
+plugins:
+  - serverless-offline
