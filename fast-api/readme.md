@@ -66,6 +66,10 @@ All dependencies are listed in `requirements.txt` and can be installed with `pip
    ```bash
    pip install -r requirements.txt
    ```
+   Alternatively, if starting fresh:
+   ```bash
+   pip install fastapi uvicorn
+   ```
 
 5. **(Optional) Generate requirements.txt** (if not present or to update with current packages):
    ```bash
