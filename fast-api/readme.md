@@ -208,7 +208,7 @@ def greet_decorator(func):
         print("👋 Goodbye after the function runs!")
     return wrapper
 
-@greet_decorator
+@greet_decorator  # decorator syntax is like --> say_name = greet_decorator(say_name)
 def say_name():
     print("My name is Ganesh!")
 
