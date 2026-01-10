@@ -1,1 +1,4 @@
 aws_practice/serverless_lambda/news_app
+.env
+venv/
+__pycache__/
